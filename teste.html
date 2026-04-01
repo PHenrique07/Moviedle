@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Uma página HTML de exemplo para testes de commit no Git.">
+    <title>Página de Teste de Commits</title>
+    <style>
+        /* Estilos básicos apenas para não ficar completamente sem formatação */
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0 auto; max-width: 900px; padding: 20px; color: #333; }
+        header { background: #f4f4f4; padding: 1rem; text-align: center; border-bottom: 2px solid #ccc; }
+        nav ul { list-style: none; padding: 0; display: flex; justify-content: center; gap: 15px; }
+        nav a { text-decoration: none; color: #0056b3; font-weight: bold; }
+        section { margin-top: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f9f9f9; }
+        form { background: #fafafa; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], input[type="email"], textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #0056b3; color: #fff; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #004494; }
+        footer { margin-top: 3rem; text-align: center; font-size: 0.9em; color: #777; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bem-vindo à Página de Teste</h1>
+        <p>Use este arquivo para criar histórico de commits, testar branches e merges.</p>
+        <nav>
+            <ul>
+                <li><a href="#artigo">Artigo</a></li>
+                <li><a href="#tabela">Tabela de Dados</a></li>
+                <li><a href="#formulario">Formulário</a></li>
+                <li><a href="#midia">Mídia</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="artigo">
+            <h2>1. Elementos de Texto e Estrutura</h2>
+            <article>
+                <h3>Entendendo o Versionamento</h3>
+                <p>O <strong>Git</strong> é um sistema de controle de versão distribuído gratuito e de código aberto projetado para lidar com tudo, desde projetos pequenos até muito grandes com velocidade e eficiência. Ele é fácil de aprender e tem uma pegada minúscula com desempenho extremamente rápido.</p>
+                
+                <blockquote>
+                    "O Git superou outros sistemas SCM como Subversion, CVS, Perforce e ClearCase com recursos como ramificação (branching) local barata, áreas de teste (staging areas) convenientes e múltiplos fluxos de trabalho."
+                </blockquote>
+
+                <h4>Principais Comandos do Git que você pode testar:</h4>
+                <ul>
+                    <li><code>git add .</code> - Adiciona os arquivos modificados ao stage.</li>
+                    <li><code>git commit -m "mensagem"</code> - Cria o commit com suas alterações.</li>
+                    <li><code>git push origin main</code> - Envia para o repositório remoto.</li>
+                    <li><code>git status</code> - Verifica o estado atual dos arquivos.</li>
+                </ul>
+
+                <h4>Passos para um bom commit:</h4>
+                <ol>
+                    <li>Entenda o que foi modificado.</li>
+                    <li>Separe alterações lógicas em commits diferentes.</li>
+                    <li>Escreva uma mensagem clara e concisa no imperativo.</li>
+                </ol>
+            </article>
+        </section>
+
+        <section id="tabela">
+            <h2>2. Tabela de Usuários (Exemplo)</h2>
+            <p>Abaixo está uma tabela de dados genérica para você alterar linhas e colunas.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome Completo</th>
+                        <th>Cargo</th>
+                        <th>Departamento</th>
+                        <th>Status
