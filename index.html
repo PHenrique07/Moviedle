@@ -1,11 +1,662 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moviedle</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOVIEDLE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --black:    #06060a;
+      --deep:     #0e0b10;
+      --surface:  #120f16;
+      --border:   #2a1f30;
+      --amber:    #c8903e;
+      --amber-lt: #e8b86a;
+      --neon:     #ff2255;
+      --cyan:     #00c8e0;
+      --cream:    #ddd0b8;
+      --muted:    #6a5a50;
+      --film:     #1a1218;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--black);
+      color: var(--cream);
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ─── Scanlines ─── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,.16) 3px,
+        rgba(0,0,0,.16) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── Film grain ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+      opacity: .055;
+      pointer-events: none;
+      z-index: 9998;
+      animation: staticShift 8s steps(4) infinite;
+    }
+    @keyframes staticShift {
+      0%   { background-position: 0 0; }
+      25%  { background-position: -60px 40px; }
+      50%  { background-position: 30px -20px; }
+      75%  { background-position: -20px 60px; }
+      100% { background-position: 0 0; }
+    }
+
+    /* ─── Venetian blind light ─── */
+    .blinds {
+      position: fixed; top: 0; left: 0; right: 0; height: 100vh;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(200,144,62,.022) 0px,
+        rgba(200,144,62,.022) 18px,
+        transparent 18px,
+        transparent 60px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── Projector cone ─── */
+    .projector {
+      position: fixed;
+      top: -80px; right: 8vw;
+      width: 0; height: 0;
+      border-left:  260px solid transparent;
+      border-right: 260px solid transparent;
+      border-top:   800px solid rgba(200,144,62,.035);
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(40px);
+    }
+
+    /* ─── Wrapper ─── */
+    .wrapper {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 24px 80px;
+    }
+
+    /* ─── TOP FILM STRIP ─── */
+    .filmstrip-top {
+      width: 100%;
+      background: var(--film);
+      border-bottom: 2px solid #1e1620;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sprocket-row {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex: 1;
+    }
+    .sprocket {
+      width: 13px; height: 9px;
+      border-radius: 2px;
+      border: 1.5px solid #2a1f30;
+      background: var(--black);
+      flex-shrink: 0;
+    }
+    .strip-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: .28em;
+      color: #2e2232;
+      text-transform: uppercase;
+      white-space: nowrap;
+      padding: 0 20px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      text-align: center;
+      padding: 54px 0 50px;
+      animation: fadeIn 1.2s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+    .eyebrow-line {
+      width: 44px; height: 1px;
+      background: var(--amber);
+      opacity: .45;
+    }
+    .eyebrow span {
+      font-size: 10px;
+      letter-spacing: .32em;
+      color: var(--amber);
+      text-transform: uppercase;
+      opacity: .75;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(72px, 13vw, 128px);
+      font-weight: 900;
+      line-height: .88;
+      letter-spacing: -.01em;
+      position: relative;
+      display: inline-block;
+    }
+    h1 .movie {
+      display: block;
+      color: var(--cream);
+      text-shadow: 2px 2px 0 #000, 0 0 50px rgba(200,144,62,.12);
+    }
+    h1 .dle {
+      display: block;
+      font-style: italic;
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--amber);
+      text-shadow:
+        0 0 30px rgba(255,34,85,.55),
+        0 0 70px rgba(255,34,85,.2);
+      letter-spacing: .06em;
+    }
+
+    .neon-line {
+      display: block;
+      margin: 16px auto 0;
+      width: 68%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon), transparent);
+      box-shadow: 0 0 10px var(--neon), 0 0 28px rgba(255,34,85,.35);
+      animation: flicker 7s ease-in-out infinite;
+    }
+    @keyframes flicker {
+      0%,100% { opacity: 1; }
+      91%      { opacity: 1; }
+      92%      { opacity: .15; }
+      93%      { opacity: 1; }
+      96%      { opacity: .55; }
+      97%      { opacity: 1; }
+    }
+
+    .tagline {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      font-style: italic;
+    }
+    .tagline em { color: var(--amber-lt); font-style: normal; }
+
+    /* ─── SECTION LABEL ─── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      align-self: flex-start;
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto 28px;
+      animation: fadeIn 1.2s .3s both;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--amber);
+      opacity: .6;
+      flex-shrink: 0;
+    }
+    .section-label::after {
+      content: '';
+      display: block;
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+    .section-label span {
+      font-size: 9px;
+      letter-spacing: .28em;
+      color: var(--muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ─── MODES GRID ─── */
+    .modes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+      gap: 24px;
+      width: 100%;
+      max-width: 860px;
+      justify-content: center;
+      animation: riseUp 1s .4s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      position: relative;
+      height: 395px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      transition: border-color .4s, transform .5s cubic-bezier(.16,1,.3,1), box-shadow .4s;
+    }
+
+    /* corner notch TL */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 10px; left: 10px;
+      width: 16px; height: 16px;
+      border-top: 1.5px solid var(--amber);
+      border-left: 1.5px solid var(--amber);
+      opacity: 0;
+      transition: opacity .35s;
+      z-index: 10;
+    }
+    /* corner notch BR */
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: 10px; right: 10px;
+      width: 16px; height: 16px;
+      border-bottom: 1.5px solid var(--amber);
+      border-right: 1.5px solid var(--amber);
+      opacity: 0;
+      transition: opacity .35s;
+      z-index: 10;
+    }
+    .card:hover::before, .card:hover::after { opacity: 1; }
+    .corner-tr, .corner-bl {
+      position: absolute;
+      width: 16px; height: 16px;
+      opacity: 0;
+      transition: opacity .35s;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .corner-tr {
+      top: 10px; right: 10px;
+      border-top: 1.5px solid var(--amber);
+      border-right: 1.5px solid var(--amber);
+    }
+    .corner-bl {
+      bottom: 10px; left: 10px;
+      border-bottom: 1.5px solid var(--amber);
+      border-left: 1.5px solid var(--amber);
+    }
+    .card:hover .corner-tr,
+    .card:hover .corner-bl { opacity: 1; }
+
+    .card:hover {
+      border-color: rgba(200,144,62,.45);
+      transform: translateY(-6px);
+      box-shadow: 0 28px 70px rgba(0,0,0,.75), 0 0 50px rgba(255,34,85,.05);
+    }
+
+    /* side film perforations */
+    .perfs {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 20px;
+      left: 0;
+      background: var(--film);
+      border-right: 1px solid #1e1620;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+      z-index: 3;
+      padding: 10px 0;
+    }
+    .perfs.right {
+      left: auto; right: 0;
+      border-right: none;
+      border-left: 1px solid #1e1620;
+    }
+    .perf {
+      width: 8px; height: 11px;
+      border-radius: 1.5px;
+      background: var(--black);
+      border: 1px solid #1e1620;
+    }
+
+    /* card art layer */
+    .card-art {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .art-infinite {
+      background:
+        linear-gradient(160deg, rgba(255,34,85,.07) 0%, transparent 45%),
+        radial-gradient(ellipse 200px 250px at 72% 30%, rgba(255,34,85,.09), transparent),
+        radial-gradient(ellipse 150px 180px at 25% 70%, rgba(0,200,224,.06), transparent),
+        linear-gradient(180deg, #130e18 0%, #080608 100%);
+    }
+    .art-daily {
+      background: linear-gradient(180deg, #0f0c14 0%, #080608 100%);
+    }
+
+    /* glowing vignette on hover */
+    .card-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 40% 80%, rgba(255,34,85,.07), transparent 65%);
+      opacity: 0;
+      transition: opacity .5s;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .card:hover .card-glow { opacity: 1; }
+
+    /* big decorative char */
+    .card-deco {
+      position: absolute;
+      top: 10px; left: 22px;
+      font-family: 'Playfair Display', serif;
+      font-size: 200px;
+      line-height: 1;
+      font-weight: 900;
+      color: rgba(200,144,62,.04);
+      pointer-events: none;
+      z-index: 2;
+      user-select: none;
+      transition: color .4s;
+    }
+    .card:hover .card-deco { color: rgba(200,144,62,.07); }
+
+    /* card inner content */
+    .card-inner {
+      position: relative;
+      z-index: 4;
+      padding: 0 30px 28px 30px;
+    }
+
+    .mode-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(200,144,62,.3);
+      border-radius: 2px;
+      padding: 4px 10px;
+      margin-bottom: 14px;
+      font-size: 9px;
+      letter-spacing: .22em;
+      color: var(--amber);
+      text-transform: uppercase;
+    }
+    .blink-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 7px var(--neon);
+      animation: blink 1.9s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .card-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.0;
+      color: var(--cream);
+      margin-bottom: 10px;
+      text-shadow: 0 2px 24px rgba(0,0,0,.9);
+    }
+    .card-title em { font-style: italic; color: var(--amber-lt); }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 22px;
+      max-width: 240px;
+      letter-spacing: .02em;
+    }
+
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      border: 1px solid rgba(200,144,62,.38);
+      border-radius: 2px;
+      padding: 10px 18px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--amber);
+      cursor: pointer;
+      transition: background .3s, color .3s, border-color .3s, box-shadow .3s;
+    }
+    .card:hover .play-btn {
+      background: var(--neon);
+      border-color: var(--neon);
+      color: #fff;
+      box-shadow: 0 0 22px rgba(255,34,85,.5);
+    }
+    .play-arrow { transition: transform .3s; display: inline-block; }
+    .card:hover .play-arrow { transform: translateX(4px); }
+
+    /* ─── Coming soon ─── */
+    .card-soon {
+      pointer-events: none;
+      filter: grayscale(.85) brightness(.45);
+    }
+    .card-soon .mode-tag { border-color: rgba(255,255,255,.08); color: var(--muted); }
+    .card-soon .blink-dot { background: var(--muted); box-shadow: none; animation: none; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 52px 0 0;
+      animation: fadeIn 1.2s .65s both;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-icon { font-size: 18px; opacity: .25; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      margin-top: 28px;
+      font-size: 10px;
+      letter-spacing: .2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-align: center;
+      animation: fadeIn 1.2s .75s both;
+    }
+    footer strong {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 12px;
+      letter-spacing: .05em;
+      text-transform: none;
+      color: rgba(200,144,62,.65);
+    }
+
+    /* ─── Animations ─── */
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes riseUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: #2a1f30; }
+  </style>
 </head>
 <body>
-<!-- Moviedle -->
+
+  <div class="blinds"></div>
+  <div class="projector"></div>
+
+  <div class="wrapper">
+
+    <!-- ── TOP FILMSTRIP ── -->
+    <div class="filmstrip-top">
+      <div class="sprocket-row">
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <span class="strip-label">MOVIEDLE · PROD. Nº 001 · 35mm · 1.85:1</span>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+      </div>
+    </div>
+
+    <!-- ── HEADER ── -->
+    <header>
+      <div class="eyebrow">
+        <div class="eyebrow-line"></div>
+        <span>O jogo das capas de cinema</span>
+        <div class="eyebrow-line"></div>
+      </div>
+
+      <h1>
+        <span class="movie">MOVIE</span>
+        <span class="dle">DLE</span>
+      </h1>
+      <span class="neon-line"></span>
+
+      <p class="tagline">Você reconhece um filme pela capa? <em>Prove.</em></p>
+    </header>
+
+    <!-- ── SECTION LABEL ── -->
+    <div class="section-label">
+      <span>Escolha o modo de jogo</span>
+    </div>
+
+    <!-- ── MODES ── -->
+    <div class="modes">
+
+      <!-- CAPAS INFINITAS -->
+      <a href="infinitas.html" class="card" aria-label="Jogar Capas Infinitas">
+        <span class="corner-tr"></span>
+        <span class="corner-bl"></span>
+
+        <div class="perfs">
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+        </div>
+        <div class="perfs right">
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+        </div>
+
+        <div class="card-art art-infinite"></div>
+        <div class="card-glow"></div>
+        <div class="card-deco">∞</div>
+
+        <div class="card-inner">
+          <div class="mode-tag"><span class="blink-dot"></span> Infinito</div>
+          <div class="card-title">Capas<br><em>Infinitas</em></div>
+          <p class="card-desc">Adivinhe filmes e séries sem limite. Sem relógio, sem pressão — só você e as capas.</p>
+          <button class="play-btn">
+            Jogar agora <span class="play-arrow">&#8594;</span>
+          </button>
+        </div>
+      </a>
+
+      <!-- MODO DIÁRIO — coming soon -->
+      <div class="card card-soon" aria-hidden="true">
+        <span class="corner-tr"></span>
+        <span class="corner-bl"></span>
+
+        <div class="perfs">
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+        </div>
+        <div class="perfs right">
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+          <div class="perf"></div><div class="perf"></div>
+        </div>
+
+        <div class="card-art art-daily"></div>
+        <div class="card-deco" style="font-size:150px; color:rgba(255,255,255,.025);">24h</div>
+
+        <div class="card-inner">
+          <div class="mode-tag"><span class="blink-dot"></span> Em breve</div>
+          <div class="card-title">Modo<br><em>Diário</em></div>
+          <p class="card-desc">Um novo desafio a cada dia. Compare seu resultado com todos os jogadores.</p>
+          <button class="play-btn" tabindex="-1">
+            Em breve <span class="play-arrow">&#8594;</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── DIVIDER ── -->
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-icon">🎞</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+      <strong>Moviedle</strong> &nbsp;·&nbsp; todos os direitos reservados &nbsp;·&nbsp; 2025
+    </footer>
+
+  </div>
+
 </body>
 </html>
